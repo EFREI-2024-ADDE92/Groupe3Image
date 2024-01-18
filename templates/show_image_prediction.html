@@ -47,6 +47,9 @@
  {% if prediction %}
  <h2>Prediction: {{ prediction }}</h2>
  {% endif %}
+ {% if confidence_level %}
+ <h2>Confidence score : {{ (confidence_level * 100)|round(2)}} %</h2>
+ {% endif %}
  </div>
 </body>
 </html>

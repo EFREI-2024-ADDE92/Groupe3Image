@@ -1,6 +1,6 @@
 import torch
 from torchvision import transforms
-from flask import Flask, request, redirect, url_for, render_template
+from flask import Flask, request, render_template
 from PIL import Image
 from ResNet import ResNet9Lighting
 import io
@@ -37,10 +37,12 @@ def predict_image(image_path):
  
     # Get the predicted class index
     _, predicted_index = torch.max(output, 1)
+    
+    probabilities = torch.nn.functional.softmax(output, dim=1)
  
     # You can map the predicted index to a human-readable label based on your model
     # For simplicity, let's just return the predicted index in this example
-    return {'prediction': labels[int(predicted_index)]}
+    return {'prediction': labels[int(predicted_index)], 'probability': probabilities[0][predicted_index].item()}
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -52,12 +54,13 @@ def upload_files():
        if file.filename == '':
            return 'No selected file'
        if file:
-           prediction = predict_image(file)
+           prediction = predict_image(file)['prediction'].capitalize()
+           confidence_level = predict_image(file)['probability']
            image = Image.open(file.stream)
            buffered = io.BytesIO()
            image.save(buffered, format="JPEG")
            img_str = base64.b64encode(buffered.getvalue()).decode()
-           return render_template('show_image_prediction.html', img_str=img_str, prediction=prediction)
+           return render_template('show_image_prediction.html', img_str=img_str, prediction=prediction, confidence_level = confidence_level)
    return render_template('show_image_prediction.html')
 
 @app.route('/predict', methods=['GET', 'POST'])
