@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Upload new File</title>
+ <style>
+ div {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+ }
+ body {
+   font-family: Arial, sans-serif;
+   margin: 0;
+   padding: 0;
+   background-color: #f0f0f0;
+ }
+ h1 {
+   color: #333;
+ }
+ form {
+   max-width: 300px;
+   padding: 20px;
+   background-color: #fff;
+   box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+   margin-bottom: 15px;
+ }
+ input[type="file"] {
+   margin-bottom: 10px;
+ }
+ img {
+   max-width: 30%;
+   height: auto;
+ }
+ </style>
+</head>
+<body>
+ <div>
+ <h1>Upload new File</h1>
+ <form method="post" enctype="multipart/form-data">
+ <input type="file" name="file">
+ <input type="submit">
+ </form>
+ {% if img_str %}
+ <img src="data:image/jpeg;base64,{{ img_str }}">
+ {% endif %}
+ {% if prediction %}
+ <h2>Prediction: {{ prediction }}</h2>
+ {% endif %}
+ </div>
+</body>
+</html>
