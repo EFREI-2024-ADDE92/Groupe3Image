@@ -7,7 +7,7 @@ import base64
 from prometheus_client import Counter, generate_latest, REGISTRY
 from ResNet import ResNet9Lighting
 
-model = ResNet9Lighting.load_from_checkpoint('epoch=45-step=4048.ckpt', map_location= {'cuda:0':'cpu'})
+model = ResNet9Lighting.load_from_checkpoint('model.ckpt', map_location= {'cuda:0':'cpu'})
 
 model.eval()
 model.freeze()
