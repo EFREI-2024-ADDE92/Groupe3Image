@@ -15,7 +15,7 @@ model.freeze()
 
 app = Flask(__name__)
 
-
+app.config['SECRET_KEY'] = 'notouchmykeyportu'
 
 api_call_counter = Counter('api_calls_total', 'Total number of API calls')
 api_call_counter_sea = Counter('api_predictions_sea', 'Total number of Sea predictions')
@@ -26,7 +26,7 @@ api_call_counter_mountain = Counter('api_predictions_mountain', 'Total number of
 api_call_counter_street = Counter('api_predictions_street', 'Total number of Street predictions')
 
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
 def allowed_file(filename):

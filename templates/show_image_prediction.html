@@ -42,6 +42,15 @@
  <input type="file" name="file">
  <input type="submit">
  </form>
+ {% with messages = get_flashed_messages() %}
+ {% if messages %}
+ <ul>
+ {% for message in messages %}
+ <li>{{ message }}</li>
+ {% endfor %}
+ </ul>
+ {% endif %}
+ {% endwith %}
  {% if img_str %}
  <img src="data:image/jpeg;base64,{{ img_str }}">
  {% endif %}
