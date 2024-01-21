@@ -85,12 +85,12 @@ def predict_image(image_path):
 @app.route('/', methods=['GET', 'POST'])
 def upload_files():
    if request.method == 'POST':
+       file = request.files['file']
        if 'file' not in request.files:
            flash('No file part')
-       file = request.files['file']
-       if file.filename == '':
+       elif file.filename == '':
            flash('No selected file')
-       if file and allowed_file(file.filename):
+       elif file and allowed_file(file.filename):
            prediction = predict_image(file)
            choose_prediction = prediction['prediction'].capitalize()
            confidence_level = prediction['probability']
