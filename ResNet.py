@@ -75,7 +75,7 @@ class ResNet9Lighting(L.LightningModule):
         self.log('val_loss', loss)
         return {'val_loss': loss.detach(), 'val_acc': acc}
     
-    def accuracy(outputs, labels):
+    def accuracy(self, outputs, labels):
         max = torch.max(outputs)
         sum = torch.sum(max == labels)
         acc = sum.item() / len(labels)
