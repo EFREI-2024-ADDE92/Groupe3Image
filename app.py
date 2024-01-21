@@ -4,23 +4,18 @@ from flask import Flask, flash, request, render_template, Response
 from PIL import Image
 import io
 import base64
-import mlflow
 from prometheus_client import Counter, generate_latest, REGISTRY
+from ResNet import ResNet9Lighting
 
-
-tracking_uri = "http://68.219.107.45:5000/"
-mlflow.set_tracking_uri(tracking_uri)
-
-logged_model = 'runs:/9098b5d37e6b42d1bae3f5817d9de52b/sklearn-model'
-
-# Load model
-model = mlflow.sklearn.load_model(logged_model)
+model = ResNet9Lighting.load_from_checkpoint('epoch=45-step=4048.ckpt', map_location= {'cuda:0':'cpu'})
 
 model.eval()
 model.freeze()
 
 
 app = Flask(__name__)
+
+
 
 api_call_counter = Counter('api_calls_total', 'Total number of API calls')
 api_call_counter_sea = Counter('api_predictions_sea', 'Total number of Sea predictions')
@@ -30,6 +25,12 @@ api_call_counter_glacier = Counter('api_predictions_glacier', 'Total number of G
 api_call_counter_mountain = Counter('api_predictions_mountain', 'Total number of Mountain predictions')
 api_call_counter_street = Counter('api_predictions_street', 'Total number of Street predictions')
 
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Define the transformation to be applied to the input image
 labels = ['buildings', 'forest', 'glacier', 'mountain', 'sea', 'street']
@@ -89,7 +90,7 @@ def upload_files():
        file = request.files['file']
        if file.filename == '':
            flash('No selected file')
-       if file:
+       if file and allowed_file(file.filename):
            prediction = predict_image(file)
            choose_prediction = prediction['prediction'].capitalize()
            confidence_level = prediction['probability']
@@ -99,20 +100,21 @@ def upload_files():
            image.save(buffered, format="JPEG")
            img_str = base64.b64encode(buffered.getvalue()).decode()
            return render_template('show_image_prediction.html', img_str=img_str, prediction=choose_prediction, confidence_level = confidence_level)
+       else:
+           flash('No file format allowed')
    return render_template('show_image_prediction.html')
 
 @app.route('/predict', methods=['POST'])
 def make_prediction():
-   if request.method == 'POST':
-       if 'file' not in request.files:
-           return 'No file part'
-       file = request.files['file']
-       if file.filename == '':
-           return 'No selected file'
-       if file:
-           prediction = predict_image(file)
-           api_call_counter.inc()
-           return prediction
+    if 'file' not in request.files:
+        return 'No file part'
+    file = request.files['file']
+    if file.filename == '':
+        return 'No selected file'
+    if file:
+        prediction = predict_image(file)
+        api_call_counter.inc()
+        return prediction
 
 @app.route('/metrics', methods=['GET'])
 def metrics():

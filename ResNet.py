@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jan 17 21:13:05 2024
+Created on Sun Jan 21 17:15:56 2024
 
 @author: kevin
 """
 
-import lightning as L
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
+import pytorch_lightning as L
 
 class ResNet9Lighting(L.LightningModule):
   ## computationnal code
     def __init__(self, in_channels, num_classes, max_lr, weight_decay):
         super().__init__()
+        self.save_hyperparameters()
 
         self.conv1 = self.conv_block(in_channels, 64)
         self.conv2 = self.conv_block(64, 128, pool=True)
@@ -30,7 +31,7 @@ class ResNet9Lighting(L.LightningModule):
 
         self.max_lr = max_lr
         self.weight_decay = weight_decay
-    
+        
     def conv_block(self, in_channels, out_channels, pool=False):
        layers = [
            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
@@ -40,12 +41,6 @@ class ResNet9Lighting(L.LightningModule):
        if pool:
            layers.append(nn.MaxPool2d(2))
        return nn.Sequential(*layers)
-    
-    def accuracy(self, outputs, labels):
-        max = torch.max(outputs)
-        sum = torch.sum(max == labels)
-        acc = sum.item() / len(labels)
-        return torch.tensor(acc)
 
     ## forward hook
     def forward(self, xb):
@@ -79,3 +74,9 @@ class ResNet9Lighting(L.LightningModule):
         acc = self.accuracy(out, labels)      # Calculate accuracy
         self.log('val_loss', loss)
         return {'val_loss': loss.detach(), 'val_acc': acc}
+    
+    def accuracy(outputs, labels):
+        max = torch.max(outputs)
+        sum = torch.sum(max == labels)
+        acc = sum.item() / len(labels)
+        return torch.tensor(acc)
